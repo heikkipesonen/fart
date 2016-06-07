@@ -1,0 +1,18 @@
+$theme : (
+  primary: rgba(255, 89, 89, 1),
+  textprimary: rgb(252, 252, 252),
+  secondary: rgb(215, 43, 209),
+  textsecondary: rgb(255, 255, 255)
+);
+
+@mixin bg($color) {
+  background-color: map-get($theme, $color);
+}
+
+@mixin color($color) {
+  color: map-get($theme, $color);
+}
+
+@mixin theme($prop, $color) {
+  #{$prop}: map-get($theme, $color);
+}

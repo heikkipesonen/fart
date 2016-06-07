@@ -3,12 +3,12 @@
 
     <line x1="0" y2="0" :x2="parentLocation.x" :y2="parentLocation.y"></line>
 
-    <Item v-for="item in item.children" :item="item"></Item>
+    <Item v-for="item in item.children" :item="item" track-by="id"></Item>
 
-    <circle class="primary" :cx="0" :cy="0" r="50" v-on:mousedown="startDrag" v-on:click="showEditor"></circle>
-    <circle class="secondary" :cx="0" :cy="0" r="70"></circle>
+    <circle class="primary" :cx="0" :cy="0" r="30" v-on:mousedown="startDrag" v-on:click="showEditor"></circle>
+    <circle class="secondary" :cx="0" :cy="0" r="50"></circle>
 
-    <text text-anchor="middle" x="0" y="70">{{ item.name }}</text>
+    <text class="text" text-anchor="middle" x="0" y="70">{{ item.name }}</text>
 
   </g>
 
@@ -35,6 +35,7 @@ export default {
     item: {
       type: Object,
       default: {
+        id: 0,
         x: 0,
         y: 0
       }
@@ -43,6 +44,7 @@ export default {
 
   data () {
     return {
+      loading: false,
       dx: 0,
       dy: 0,
       showChildren: false,
@@ -59,11 +61,15 @@ export default {
     },
 
     position () {
-      return `translate(${this.item.x}, ${this.item.y})`
+      return `translate(${this.item.x || 0}, ${this.item.y || 0})`
     },
 
     classNames () {
-      return this.lastEvent ? 'dragging' : ''
+      let classNames = ''
+      classNames += this.lastEvent ? 'dragging' : ''
+      classNames += this.loading ? 'loading' : ''
+
+      return classNames
     }
   },
 
@@ -163,7 +169,10 @@ export default {
 
     update () {
       var resource = this.$resource('item/' + this.item.id)
+      this.loading = true
+
       return resource.update(this.item).then((response) => {
+        this.loading = false
         this.$set('item', response.data)
       })
     }
@@ -180,18 +189,29 @@ export default {
   }
 }
 </script>
-<style scoped>
+<style lang="scss" scoped>
+@import '../styles/theme';
+
+.text{
+  font-weight: 200;
+  text-transform: uppercase;
+  @include theme(fill, primary);
+}
 
 .dragging circle.primary{
-  fill: rgb(228, 63, 52);
+  @include theme(fill, secondary);
 }
 
 .dragging line{
-  stroke: rgb(228, 63, 52);
+  @include theme(stroke, secondary);
+}
+
+.loading * {
+  opacity: 0.5;
 }
 
 circle.primary{
-  fill: rgb(52, 197, 228);
+  @include theme(fill, primary);
   position: relative;
   transition: 0.3s;
   cursor: pointer;
@@ -206,15 +226,15 @@ circle.secondary{
 }
 
 circle.primary:hover{
-  fill: rgb(8, 254, 254);
+  @include theme(fill, secondary);
 }
 
 circle.primary:hover + circle.secondary{
-  stroke: rgb(255, 138, 24);
+  @include theme(stroke, secondary);
 }
 
 line{
-   stroke: rgb(52, 197, 228);
+   @include theme(stroke, primary);
    stroke-width: 2;
    transition: 0.3s;
 }
