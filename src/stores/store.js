@@ -11,15 +11,17 @@ const state = {
   view: {
     x: 0,
     y: 0,
-    scale: 1
+    scale: 1,
+    size: {
+      width: 0,
+      height: 0
+    }
   }
 }
 
 const mutations = {
   SETVIEW (state, view) {
-    state.view.x = view.x
-    state.view.y = view.y
-    state.view.scale = view.scale
+    state.view = view
   },
 
   SETCANVAS (state, canvas) {

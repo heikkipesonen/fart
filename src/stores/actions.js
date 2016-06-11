@@ -14,8 +14,8 @@ let OBJECTS = null
 export const addChild = function ({dispatch, state}, child) {
   if (!child) {
     child = {
-      x: state.view.x,
-      y: state.view.y,
+      x: state.view.center.x,
+      y: state.view.center.y,
       width: 30,
       height: 30
     }
@@ -35,8 +35,8 @@ export const addChild = function ({dispatch, state}, child) {
 
 export const setToChild = function ({dispatch, state}, source, target) {
   let sourceObject = state.objects[source]
-  let sourcePosition = getObjectPosition(source, state)
-  let targetPosition = getObjectPosition(target, state)
+  let sourcePosition = getObjectPosition(source, state.objects)
+  let targetPosition = getObjectPosition(target, state.objects)
 
   sourceObject.x = sourcePosition.x - targetPosition.x
   sourceObject.y = sourcePosition.y - targetPosition.y
@@ -76,11 +76,11 @@ export const setToChild = function ({dispatch, state}, source, target) {
 export const dropItem = function ({dispatch, state}, id) {
   if (state.objects[id].parent) return
 
-  let dropPosition = getObjectPosition(id, state)
+  let dropPosition = getObjectPosition(id, state.objects)
 
   let dropTarget = Object.keys(state.objects).find((key) => {
     if (key === id) return false
-    let objectPosition = getObjectPosition(key, state)
+    let objectPosition = getObjectPosition(key, state.objects)
     return objectIntersects(objectPosition, dropPosition)
   })
 
@@ -176,14 +176,4 @@ export const createCanvas = function ({dispatch, state}, data) {
   initializeCanvas({dispatch, state}, canvas.key)
 
   router.go('/' + canvas.key)
-}
-
-/**
- * [setView description]
- * @param {[type]} {dispatch [description]
- * @param {[type]} state}    [description]
- * @param {[type]} view      [description]
- */
-export const setView = function ({dispatch, state}, view) {
-  dispatch('SETVIEW', view)
 }

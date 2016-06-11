@@ -1,5 +1,5 @@
 <template>
-  <svg class="view-canvas" :width="size.width" :height="size.height" v-on:mousedown.self="startDrag" v-on:click.self="_onClick">
+  <svg class="view-canvas" :width="position.size.width" :height="position.size.height" v-on:mousedown.self="startDrag" v-on:click.self="_onClick">
     <defs>
       <filter id="f1" x="0" y="0">
         <feGaussianBlur in="SourceGraphic" stdDeviation="0" />
@@ -15,22 +15,13 @@
 <script>
 import Api from '../api'
 import { getPointer } from '../utils'
-import { setView } from '../stores/actions'
+import { setView } from '../stores/view-actions'
 import { viewPort } from '../stores/getters'
 
 export default {
   props: {
     onClick: {
       type: Function
-    },
-    center: {
-      type: Object,
-      default () {
-        return {
-          x: 0,
-          y: 0
-        }
-      }
     }
   },
 
@@ -46,10 +37,6 @@ export default {
 
   data () {
     return {
-      size: {
-        width: window.innerWidth,
-        height: window.innerHeight
-      },
       lastEvent: null,
       deltaX: 0,
       deltaY: 0
@@ -63,7 +50,14 @@ export default {
       }
     },
 
-    projectToCanvas (x, y) {
+    toScreen (x, y) {
+      return {
+        x: x + this.position.x * this.position.scale,
+        y: y + this.position.y + this.position.scale
+      }
+    },
+
+    toCanvas (x, y) {
       return {
         x: (x - this.position.x) / this.position.scale,
         y: (y - this.position.y) / this.position.scale
@@ -72,7 +66,7 @@ export default {
 
     getPointerOnCanvas (event) {
       let pointer = getPointer(event)
-      return this.projectToCanvas(pointer.x, pointer.y)
+      return this.toCanvas(pointer.x, pointer.y)
     },
 
     startDrag (event) {
@@ -94,7 +88,9 @@ export default {
         let position = {
           x: this.position.x + sx,
           y: this.position.y + sy,
-          scale: this.position.scale
+          scale: this.position.scale,
+          size: this.position.size,
+          center: this.toCanvas(this.position.size.width / 2, this.position.size.height / 2)
         }
 
         this.lastEvent = pointer
@@ -122,7 +118,9 @@ export default {
       let position = {
         x: (ix + (pointer.x - ix) - nx),
         y: (iy + (pointer.y - iy) - ny),
-        scale: newScale
+        size: this.position.size,
+        scale: newScale,
+        center: this.toCanvas(this.position.size.width / 2, this.position.size.height / 2)
       }
 
       this.setView(position)
@@ -131,7 +129,7 @@ export default {
 
   computed: {
     center () {
-      return this.projectToCanvas(this.size.width / 2, this.size.height / 2)
+      return this.toCanvas(this.position.size.width / 2, this.position.size.height / 2)
     },
 
     style () {
@@ -140,12 +138,34 @@ export default {
   },
 
   ready () {
+    console.log(this.position)
     window.addEventListener('resize', () => {
-      this.$set('size', {
+      let position = {
+        x: this.position.x,
+        y: this.position.y,
+        scale: this.position.scale,
+        size: {
+          width: window.innerWidth,
+          height: window.innerHeight
+        },
+        center: this.toCanvas(this.position.size.width / 2, this.position.size.height / 2)
+      }
+
+      this.setView(position)
+    })
+
+    let position = {
+      x: this.position.x,
+      y: this.position.y,
+      scale: this.position.scale,
+      size: {
         width: window.innerWidth,
         height: window.innerHeight
-      })
-    })
+      },
+      center: this.toCanvas(this.position.size.width / 2, this.position.size.height / 2)
+    }
+
+    this.setView(position)
 
     Api.on('mousemove', (evt) => this.onDrag(evt))
     Api.on('mouseup', (evt) => this.endDrag(evt))

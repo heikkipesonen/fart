@@ -5,6 +5,7 @@
     </view-canvas>
 
     <div class="toolbar">
+      <button v-on:click="showItems()">+View</button>
       <button v-on:click="createCanvas({name: Date.now()})">+Canvas</button>
       <button v-on:click="addChild()">+Item</button>
     </div>
@@ -18,6 +19,7 @@ import ViewCanvas from './components/view-canvas'
 import ItemEditor from './components/item-editor'
 
 import { createCanvas, addChild, initializeCanvas } from './stores/actions'
+import { showItems } from './stores/view-actions'
 import { canvas } from './stores/getters'
 
 export default {
@@ -29,6 +31,7 @@ export default {
 
   vuex: {
     actions: {
+      showItems,
       createCanvas,
       addChild,
       initializeCanvas
