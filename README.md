@@ -1,6 +1,7 @@
 # client
+Stronkerest vue thing ever since last thing
 
-> A Vue.js project
+svg thing to drag yer balls with
 
 ## Build Setup
 
