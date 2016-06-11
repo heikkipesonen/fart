@@ -1,13 +1,12 @@
 <template>
 
     <view-canvas>
-      <Item v-for="(id, child) in children" :id="id" :item="child" track-by="$index"></Item>
+      <Item v-for="childId in canvas.children" :id="childId" track-by="$index"></Item>
     </view-canvas>
 
     <div class="toolbar">
-      <button v-on:click="createCanvas({name: Date.now()})">Canvas</button>
-      {{ canvas ? canvas.name : '' }}
-      <button v-on:click="addChild()">add Item</button>
+      <button v-on:click="createCanvas({name: Date.now()})">+Canvas</button>
+      <button v-on:click="addChild()">+Item</button>
     </div>
 
     <item-editor v-if="editableItem" :item="editableItem"></item-editor>
@@ -19,7 +18,7 @@ import ViewCanvas from './components/view-canvas'
 import ItemEditor from './components/item-editor'
 
 import { createCanvas, addChild, initializeCanvas } from './stores/actions'
-import { canvas, children } from './stores/getters'
+import { canvas } from './stores/getters'
 
 export default {
   components: {
@@ -36,8 +35,7 @@ export default {
     },
 
     getters: {
-      canvas,
-      children
+      canvas
     }
   },
 
@@ -56,6 +54,31 @@ export default {
 */
 @import './styles/reset';
 @import './styles/layout';
+g{
+  overflow: visible;
+}
+.toolbar{
+  position: absolute;
+  width: 64px;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  background-color: rgb(232, 0, 139);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: white;
+
+  button{
+    width: 64px;
+    height: 64px;
+    transition: 0.2s;
+
+    &:hover{
+      background-color: rgba(255, 255, 255, 0.31);
+    }
+  }
+}
 
 body, html{
   font-family: Helvetica neue;

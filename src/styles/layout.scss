@@ -4,11 +4,8 @@ button{
   border: none;
   background-color: transparent;
   cursor: pointer;
-  padding: 16px;
-  background-color: rgb(61, 196, 254);
-  color: white;
-
-  flex: 1 1 auto;
+  color: inherit;
+  text-align: center;
 }
 
 button[round] {

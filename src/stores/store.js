@@ -4,11 +4,9 @@ import Vue from 'vue'
 Vue.use(Vuex)
 
 const state = {
-  _canvas: null,
-  _children: null,
-
   canvas: {},
-  children: {},
+  selectedItem: null,
+  objects: {},
 
   view: {
     x: 0,
@@ -24,20 +22,25 @@ const mutations = {
     state.view.scale = view.scale
   },
 
-  SETCHILDREN (state, children) {
-    state.children = children
-  },
-
   SETCANVAS (state, canvas) {
     state.canvas = canvas
   },
 
-  SETCANVASREF (state, canvas) {
-    state._canvas = canvas
+  ITEMUPDATE (state, id, object) {
+    if (object === null) {
+      delete state.objects[id]
+      return
+    }
+
+    state.objects[id] = object
   },
 
-  SETCHILDREF (state, ref) {
-    state._children = ref
+  SELECTITEM (state, id) {
+    state.selectedItem = id
+  },
+
+  UNSELECT (state) {
+    state.selectedItem = null
   }
 }
 
