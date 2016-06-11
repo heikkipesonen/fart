@@ -8,14 +8,14 @@
 
     <text class="text" text-anchor="middle" x="0" y="70">{{ Math.round(item.x) }}, {{ Math.round(item.y) }}</text>
 
-    <Item v-for="childKey in item.children" :id="childKey" :parent="item.parent" track-by="$index"></Item>
+    <Item v-for="childKey in item.children" :id="childKey" track-by="$index"></Item>
   </g>
 
 </template>
 
 <script>
 import Api from '../api'
-import firebase from '../stores/firebase'
+import store from '../stores/store'
 import { dropItem, removeItem, itemUpdate, toggleSelection } from '../stores/actions'
 import { viewPort, selected } from '../stores/getters'
 
@@ -26,10 +26,6 @@ export default {
   props: {
     id: {
       type: String
-    },
-
-    parent: {
-      type: String
     }
   },
 
@@ -37,7 +33,7 @@ export default {
     actions: {
       drop: dropItem,
       remove: removeItem,
-      itemUpdate,
+      update: itemUpdate,
       toggleSelection
     },
 
@@ -49,13 +45,6 @@ export default {
 
   data () {
     return {
-      item: {
-        x: 0,
-        y: 0,
-        width: 0,
-        height: 0,
-        parent: null
-      },
       deltaX: 0,
       deltaY: 0,
       lastEvent: null
@@ -63,6 +52,10 @@ export default {
   },
 
   computed: {
+
+    item () {
+      return store.state.objects[this.id] || {x: 0, y: 0, width: 0, height: 0}
+    },
 
     position () {
       return `translate(${this.item.x || 0}, ${this.item.y || 0})`
@@ -116,26 +109,15 @@ export default {
       }
 
       this.lastEvent = null
-    },
-
-    update () {
-      this._ref.set(this.item)
     }
   },
 
   ready () {
-    this._ref = firebase.child('objects').child(this.id)
-    this._ref.on('value', (snapshot) => {
-      this.$set('item', snapshot.val())
-      this.itemUpdate(this.id, this.item)
-    })
-
     Api.on('mouseup', this.endDrag, this)
     Api.on('mousemove', this.onDrag, this)
   },
 
   beforeDestroy () {
-    this._ref.off()
     Api.remove('mouseup', this)
     Api.remove('mousemove', this)
   }

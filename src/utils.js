@@ -12,7 +12,7 @@ export function intersects (r1, r2) {
            r2.bottom < r1.top)
 }
 
-function convert (obj) {
+export function convert (obj) {
   return {
     top: obj.y - obj.height / 2,
     left: obj.x - obj.width / 2,
@@ -23,4 +23,24 @@ function convert (obj) {
 
 export function objectIntersects (obj1, obj2) {
   return intersects(convert(obj1), convert(obj2))
+}
+
+export function getObjectPosition (key, state) {
+  let object = state.objects[key]
+
+  let position = {
+    x: object.x,
+    y: object.y,
+    width: object.width,
+    height: object.height
+  }
+
+  while (object.parent) {
+    object = state.objects[object.parent]
+
+    position.x += object.x
+    position.y += object.y
+  }
+
+  return position
 }

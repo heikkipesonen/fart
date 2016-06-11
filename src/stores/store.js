@@ -26,12 +26,11 @@ const mutations = {
     state.canvas = canvas
   },
 
-  ITEMUPDATE (state, id, object) {
-    if (object === null) {
-      delete state.objects[id]
-      return
-    }
+  SETOBJECTS (state, value) {
+    state.objects = value
+  },
 
+  OBJECTUPDATE (state, id, object) {
     state.objects[id] = object
   },
 

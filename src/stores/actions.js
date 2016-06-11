@@ -1,9 +1,9 @@
 import firebase from './firebase'
 import router from '../router'
-import { objectIntersects } from '../utils'
+import { objectIntersects, getObjectPosition } from '../utils'
 
 let CANVAS = null
-let CHILDREN = null
+let OBJECTS = null
 
 /**
  * [addChild description]
@@ -21,12 +21,48 @@ export const addChild = function ({dispatch, state}, child) {
     }
   }
 
-  let childKey = firebase.child('objects').push(child).key
+  let key = OBJECTS.push(child).key
 
-  CANVAS.transaction(function (canvas) {
+  CANVAS.transaction((canvas) => {
+    if (!canvas) canvas = {}
     if (!canvas.children) canvas.children = []
-    canvas.children.push(childKey)
+
+    canvas.children.push(key)
+
     return canvas
+  })
+}
+
+export const setToChild = function ({dispatch, state}, source, target) {
+  let sourceObject = state.objects[source]
+  let sourcePosition = getObjectPosition(source, state)
+  let targetPosition = getObjectPosition(target, state)
+
+  sourceObject.x = sourcePosition.x - targetPosition.x
+  sourceObject.y = sourcePosition.y - targetPosition.y
+  sourceObject.parent = target
+
+  dispatch('OBJECTUPDATE', source, sourceObject)
+
+  CANVAS.transaction((canvas) => {
+    if (!canvas) canvas = {}
+    if (!canvas.children) canvas.children = []
+    if (canvas.children.indexOf(source) > -1) {
+      canvas.children.splice(canvas.children.indexOf(source), 1)
+    }
+
+    return canvas
+  }).then(() => {
+    OBJECTS.child(target).transaction(function (target) {
+      if (!target.children) target.children = []
+      if (target.children.indexOf(source) === -1) {
+        target.children.push(source)
+      }
+
+      return target
+    }).then(() => {
+      OBJECTS.child(source).set(sourceObject)
+    })
   })
 }
 
@@ -38,44 +74,23 @@ export const addChild = function ({dispatch, state}, child) {
  * @return {[type]}           [description]
  */
 export const dropItem = function ({dispatch, state}, id) {
-  let droppedItem = state.objects[id]
+  if (state.objects[id].parent) return
+
+  let dropPosition = getObjectPosition(id, state)
 
   let dropTarget = Object.keys(state.objects).find((key) => {
     if (key === id) return false
-
-    let object = state.objects[key]
-    return objectIntersects(droppedItem, object)
+    let objectPosition = getObjectPosition(key, state)
+    return objectIntersects(objectPosition, dropPosition)
   })
-  console.log(dropTarget)
-  if (dropTarget && droppedItem) {
-    let dropTargetItem = state.objects[dropTarget]
 
-    CANVAS.transaction(function (canvas) {
-      if (!canvas.children) canvas.children = []
-      if (canvas.children.indexOf(id) > -1) {
-        canvas.children.splice(canvas.children.indexOf(id), 1)
-      }
-      return canvas
-    }).then(() => {
-      firebase.child('objects').child(dropTarget).transaction((item) => {
-        if (!item.children) item.children = []
-        if (item.children.indexOf(id) < 0) {
-          item.children.push(id)
-        }
-        return item
-      }).then(() => {
-        droppedItem.x -= dropTargetItem.x
-        droppedItem.y -= dropTargetItem.y
-        droppedItem.parent = dropTarget
-
-        firebase.child('objects').child(id).set(droppedItem)
-      })
-    })
+  if (dropTarget) {
+    setToChild({dispatch, state}, id, dropTarget)
   }
 }
 
 export const itemUpdate = function ({dispatch, state}, id, object) {
-  dispatch('ITEMUPDATE', id, object)
+  OBJECTS.child(id).set(object)
 }
 
 export const selectItem = function ({dispatch, state}, id) {
@@ -97,14 +112,14 @@ export const toggleSelection = function ({dispatch, state}, id) {
 export const removeItem = function ({dispatch, state}, id) {
   // Object.keys(state.objects).forEach((key) => {
   //   if (state.objects[key].parents && state.objects[key].parents.indexOf(id) > -1) {
-  //     CHILDREN.child(key).transaction((child) => {
+  //     OBJECTS.child(key).transaction((child) => {
   //       child.parents.splice(child.parents.indexOf(id), 1)
   //       return child
   //     })
   //   }
   // })
   //
-  // CHILDREN.child(id).remove()
+  // OBJECTS.child(id).remove()
 }
 
 /**
@@ -116,7 +131,7 @@ export const removeItem = function ({dispatch, state}, id) {
  * @return {[type]}           [description]
  */
 export const updateItem = function ({dispatch, state}, id, child) {
-  CHILDREN.child(id).set(child)
+  OBJECTS.child(id).set(child)
 }
 
 /**
@@ -138,14 +153,15 @@ export const setCanvas = function ({dispatch, state}, canvas) {
  */
 export const initializeCanvas = function ({dispatch, state}, id) {
   CANVAS = firebase.child('canvas').child(id)
-  // CHILDREN = firebase.child('objects').child(CANVAS.key)
+  OBJECTS = firebase.child('objects').child(CANVAS.key)
+
   CANVAS.on('value', (snapshot) => {
     dispatch('SETCANVAS', snapshot.val())
   })
 
-  // CHILDREN.on('value', (snapshot) => {
-  //   dispatch('SETOBJECTS', snapshot.val())
-  // })
+  OBJECTS.on('value', (snapshot) => {
+    dispatch('SETOBJECTS', snapshot.val())
+  })
 }
 
 /**
