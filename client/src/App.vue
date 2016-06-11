@@ -1,11 +1,13 @@
 <template>
 
-    <view-canvas>
-      <Item v-for="item in items" :item="item"></Item>
+    <view-canvas :center.sync="center">
+      <Item v-for="(id, child) in children" :id="id" :item="child" track-by="$index"></Item>
     </view-canvas>
 
     <div class="toolbar">
-      <button v-on:click="createItem()">add Item</button>
+      <button v-on:click="createCanvas({name: Date.now()})">Canvas</button>
+      {{ canvas ? canvas.name : '' }}
+      <button v-on:click="addChild(center)">add Item</button>
     </div>
 
     <item-editor v-if="editableItem" :item="editableItem"></item-editor>
@@ -15,56 +17,50 @@
 import Item from './components/item'
 import ViewCanvas from './components/view-canvas'
 import ItemEditor from './components/item-editor'
+import store from './stores/store'
+
+import { createCanvas, addChild, initializeCanvas } from './stores/actions'
+import { canvas, children } from './stores/getters'
 
 export default {
-
   components: {
     ViewCanvas,
     Item,
     ItemEditor
   },
 
+  store,
+
+  vuex: {
+    actions: {
+      createCanvas,
+      addChild,
+      initializeCanvas
+    },
+
+    getters: {
+      canvas,
+      children
+    }
+  },
+
   data () {
     return {
-      id: null,
-      resource: null,
-      items: [],
-      editableItem: null
+      id: 3,
+      center: {
+        x: 0,
+        y: 0
+      }
     }
   },
 
   methods: {
-    _removeChild (item) {
-      let childIndex = this.items.indexOf(item)
-
-      if (childIndex > -1) {
-        this.items.splice(childIndex, 1)
-      }
-    },
-
-    createItem () {
-      var item = this.$resource('item')
-      item.save({
-        type: 'item'
-      }).then((response) => {
-        this.items.push(response.data)
-      })
-    },
-
-    showEditor (item) {
-      console.log(item)
-      this.editableItem = item
-    }
   },
 
   ready () {
-    this.$on('showEditor', this.showEditor)
-
-    this.resource = this.$resource('item')
-
-    this.resource.get().then((response) => {
-      this.$set('items', response.data)
-    })
+    let id = this.$route.params.canvas
+    this.initializeCanvas(id)
+    console.log(this)
   }
 }
 </script>

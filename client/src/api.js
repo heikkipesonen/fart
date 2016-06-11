@@ -1,5 +1,3 @@
-// import env from '../../env';
-
 class Api {
 
   constructor () {
@@ -13,12 +11,16 @@ class Api {
      */
     this._listeners = {}
 
-    document.addEventListener('mouseup', (event) => {
+    document.body.addEventListener('mouseup', (event) => {
       this._fire('mouseup', event)
     })
 
-    document.addEventListener('mousemove', (event) => {
+    document.body.addEventListener('mousemove', (event) => {
       this._fire('mousemove', event)
+    })
+
+    document.body.addEventListener('mousedown', (event) => {
+      this._fire('mousedown', event)
     })
   }
 

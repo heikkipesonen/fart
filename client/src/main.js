@@ -1,13 +1,20 @@
 import Vue from 'vue'
 import App from './App'
-import Resource from 'vue-resource'
+import Vuerouter from 'vue-router'
+
+Vue.use(Vuerouter)
 
 /* eslint-disable no-new */
-Vue.use(Resource)
+let router = new Vuerouter()
 
-Vue.http.options.root = 'http://localhost:8080'
-
-new Vue({
-  el: 'body',
-  components: { App }
+router.map({
+  '/:canvas': {
+    component: App
+  }
 })
+
+router.start(App, 'app')
+// new Vue({
+//   el: 'body',
+//   components: { App }
+// })
