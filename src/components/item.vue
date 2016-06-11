@@ -1,11 +1,9 @@
 <template>
+  <line v-for="parent in parentLocations" :x1="item.x" :y1="item.y" :x2="parent.x" :y2="parent.y"></line>
   <g :transform="position" :class="classNames">
-
-    <!-- <line x1="0" y2="0" :x2="parentLocation.x" :y2="parentLocation.y"></line> -->
-
+    <circle cx="0" cy="0" :r="item.width" v-on:mousedown.self="startDrag"></circle>
     <!-- <Item v-for="child in item.children" :item="child" track-by="id"></Item> -->
 
-    <circle :cx="0" :cy="0" r="30" v-on:mousedown="startDrag" v-on:click.self="addChild"></circle>
 
     <text class="text" text-anchor="middle" x="0" y="70">{{ item.name }}</text>
 
@@ -15,8 +13,9 @@
 
 <script>
 import Api from '../api'
-import { updateItem } from '../stores/actions'
+import { updateItem, dropItem } from '../stores/actions'
 import { viewPort } from '../stores/getters'
+import store from '../stores/store'
 
 export default {
   name: 'Item',
@@ -31,6 +30,8 @@ export default {
       type: Object,
       default: () => {
         return {
+          width: 50,
+          height: 50,
           x: 0,
           y: 0
         }
@@ -40,7 +41,8 @@ export default {
 
   vuex: {
     actions: {
-      update: updateItem
+      update: updateItem,
+      drop: dropItem
     },
 
     getters: {
@@ -57,19 +59,24 @@ export default {
   },
 
   computed: {
+    parentLocations () {
+      if (this.item.parents && this.item.parents.length > 0) {
+        return this.item.parents.map((parentId) => {
+          return {
+            x: store.state.children[parentId].x,
+            y: store.state.children[parentId].y
+          }
+        })
+      }
+      return []
+    },
+
     position () {
       return `translate(${this.item.x || 0}, ${this.item.y || 0})`
     }
   },
 
   methods: {
-
-    addChild () {
-      if (this.deltaX === 0 && this.deltaY === 0) {
-
-      }
-    },
-
     startDrag (evt) {
       this.deltaX = 0
       this.deltaY = 0
@@ -107,6 +114,7 @@ export default {
       if (this.lastEvent && (this.deltaX !== 0 || this.deltaY !== 0)) {
         evt.preventDefault()
         evt.stopImmediatePropagation()
+        this.drop(this.id)
       }
 
       this.lastEvent = null

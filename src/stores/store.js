@@ -26,16 +26,13 @@ const mutations = {
 
   SETCHILDREN (state, children) {
     state.children = children
-    console.log('SETUP CHILDREN', children)
   },
 
   SETCANVAS (state, canvas) {
-    console.log(canvas)
     state.canvas = canvas
   },
 
   SETCANVASREF (state, canvas) {
-    console.log('le canvas', canvas)
     state._canvas = canvas
   },
 

@@ -16,6 +16,7 @@
 import Api from '../api'
 import { getPointer } from '../utils'
 import { setView } from '../stores/actions'
+import { viewPort } from '../stores/getters'
 
 export default {
   props: {
@@ -36,6 +37,10 @@ export default {
   vuex: {
     actions: {
       setView
+    },
+
+    getters: {
+      position: viewPort
     }
   },
 
@@ -47,12 +52,7 @@ export default {
       },
       lastEvent: null,
       deltaX: 0,
-      deltaY: 0,
-      position: {
-        x: 0,
-        y: 0,
-        scale: 1
-      }
+      deltaY: 0
     }
   },
 
@@ -91,14 +91,14 @@ export default {
         this.deltaX += sx
         this.deltaY += sy
 
-        this.$set('position', {
+        let position = {
           x: this.position.x + sx,
           y: this.position.y + sy,
           scale: this.position.scale
-        })
+        }
 
         this.lastEvent = pointer
-        this.setView(this.position)
+        this.setView(position)
       }
     },
 
@@ -119,13 +119,13 @@ export default {
       let nx = ix * newScale
       let ny = iy * newScale
 
-      this.$set('position', {
+      let position = {
         x: (ix + (pointer.x - ix) - nx),
         y: (iy + (pointer.y - iy) - ny),
         scale: newScale
-      })
+      }
 
-      this.setView(this.position)
+      this.setView(position)
     }
   },
 

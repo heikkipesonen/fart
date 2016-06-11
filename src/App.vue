@@ -1,13 +1,13 @@
 <template>
 
-    <view-canvas :center.sync="center">
+    <view-canvas>
       <Item v-for="(id, child) in children" :id="id" :item="child" track-by="$index"></Item>
     </view-canvas>
 
     <div class="toolbar">
       <button v-on:click="createCanvas({name: Date.now()})">Canvas</button>
       {{ canvas ? canvas.name : '' }}
-      <button v-on:click="addChild(center)">add Item</button>
+      <button v-on:click="addChild()">add Item</button>
     </div>
 
     <item-editor v-if="editableItem" :item="editableItem"></item-editor>
@@ -17,7 +17,6 @@
 import Item from './components/item'
 import ViewCanvas from './components/view-canvas'
 import ItemEditor from './components/item-editor'
-import store from './stores/store'
 
 import { createCanvas, addChild, initializeCanvas } from './stores/actions'
 import { canvas, children } from './stores/getters'
@@ -28,8 +27,6 @@ export default {
     Item,
     ItemEditor
   },
-
-  store,
 
   vuex: {
     actions: {
@@ -42,19 +39,6 @@ export default {
       canvas,
       children
     }
-  },
-
-  data () {
-    return {
-      id: 3,
-      center: {
-        x: 0,
-        y: 0
-      }
-    }
-  },
-
-  methods: {
   },
 
   ready () {

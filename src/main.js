@@ -1,20 +1,11 @@
-import Vue from 'vue'
+import router from './router'
 import App from './App'
-import Vuerouter from 'vue-router'
-
-Vue.use(Vuerouter)
+import store from './stores/store'
 
 /* eslint-disable no-new */
-let router = new Vuerouter()
-
-router.map({
-  '/:canvas': {
-    component: App
+router.start({
+  store,
+  components: {
+    App
   }
-})
-
-router.start(App, 'app')
-// new Vue({
-//   el: 'body',
-//   components: { App }
-// })
+}, 'body')
