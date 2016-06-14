@@ -43,6 +43,16 @@ export default {
     }
   },
 
+  computed: {
+    center () {
+      return this.toCanvas(this.position.size.width / 2, this.position.size.height / 2)
+    },
+
+    style () {
+      return `translate(${this.position.x}, ${this.position.y}) scale(${this.position.scale}, ${this.position.scale})`
+    }
+  },
+
   methods: {
     _onClick (event) {
       if (this.deltaX === 0 && this.deltaY === 0 && this.onClick) {
@@ -50,6 +60,12 @@ export default {
       }
     },
 
+    /**
+     * [toScreen description]
+     * @param  {[type]} x [description]
+     * @param  {[type]} y [description]
+     * @return {[type]}   [description]
+     */
     toScreen (x, y) {
       return {
         x: x + this.position.x * this.position.scale,
@@ -57,6 +73,12 @@ export default {
       }
     },
 
+    /**
+     * [toCanvas description]
+     * @param  {[type]} x [description]
+     * @param  {[type]} y [description]
+     * @return {[type]}   [description]
+     */
     toCanvas (x, y) {
       return {
         x: (x - this.position.x) / this.position.scale,
@@ -64,17 +86,35 @@ export default {
       }
     },
 
+    /**
+     * [getPointerOnCanvas description]
+     * @param  {[type]} event [description]
+     * @return {[type]}       [description]
+     */
     getPointerOnCanvas (event) {
       let pointer = getPointer(event)
       return this.toCanvas(pointer.x, pointer.y)
     },
 
+    /**
+     * [startDrag description]
+     * @param  {[type]} event [description]
+     * @return {[type]}       [description]
+     */
     startDrag (event) {
+      event.stopImmediatePropagation()
+      event.preventDefault()
+
       this.deltaX = 0
       this.deltaY = 0
       this.lastEvent = getPointer(event)
     },
 
+    /**
+     * [onDrag description]
+     * @param  {[type]} event [description]
+     * @return {[type]}       [description]
+     */
     onDrag (event) {
       if (this.lastEvent) {
         let pointer = getPointer(event)
@@ -98,10 +138,19 @@ export default {
       }
     },
 
+    /**
+     * [endDrag description]
+     * @return {[type]} [description]
+     */
     endDrag () {
       this.lastEvent = null
     },
 
+    /**
+     * [viewZoom description]
+     * @param  {[type]} event [description]
+     * @return {[type]}       [description]
+     */
     viewZoom (event) {
       let scale = this.position.scale + (this.position.scale * event.wheelDeltaY / 4800)
 
@@ -124,22 +173,13 @@ export default {
       }
 
       this.setView(position)
-    }
-  },
-
-  computed: {
-    center () {
-      return this.toCanvas(this.position.size.width / 2, this.position.size.height / 2)
     },
 
-    style () {
-      return `translate(${this.position.x}, ${this.position.y}) scale(${this.position.scale}, ${this.position.scale})`
-    }
-  },
-
-  ready () {
-    console.log(this.position)
-    window.addEventListener('resize', () => {
+    /**
+     * [fitViewport description]
+     * @return {[type]} [description]
+     */
+    fitViewport () {
       let position = {
         x: this.position.x,
         y: this.position.y,
@@ -152,25 +192,20 @@ export default {
       }
 
       this.setView(position)
-    })
-
-    let position = {
-      x: this.position.x,
-      y: this.position.y,
-      scale: this.position.scale,
-      size: {
-        width: window.innerWidth,
-        height: window.innerHeight
-      },
-      center: this.toCanvas(this.position.size.width / 2, this.position.size.height / 2)
     }
+  },
 
-    this.setView(position)
+  ready () {
+    Api.on('resize', () => this.fitViewport())
+    this.fitViewport()
 
-    Api.on('mousemove', (evt) => this.onDrag(evt))
-    Api.on('mouseup', (evt) => this.endDrag(evt))
+    Api.on('mousemove', (evt) => this.onDrag(evt), this)
+    Api.on('mouseup', (evt) => this.endDrag(evt), this)
+    Api.on('mousewheel', (evt) => this.viewZoom(evt), this)
+  },
 
-    document.addEventListener('mousewheel', (evt) => this.viewZoom(evt))
+  beforeDestroy () {
+    Api.removeAll(this)
   }
 }
 </script>

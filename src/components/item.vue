@@ -4,11 +4,13 @@
     <line v-if="item.parent" x1="0" y1="0" :x2="-item.x" :y2="-item.y"></line>
 
     <circle class="selection-indicator" cx="0" cy="0" :r="item.width + 5"></circle>
-    <circle cx="0" cy="0" :r="item.width" v-on:mousedown.self="startDrag" v-on:click="toggleSelection(id)"></circle>
 
     <text class="text" text-anchor="middle" x="0" y="70">{{ Math.round(item.x) }}, {{ Math.round(item.y) }}</text>
+    <circle v-if="item.parent" class="detach" :cx="middlePoint.x" :cy="middlePoint.y" r="20" v-on:click.self="detach(id)"></circle>
 
-    <Item v-for="childKey in item.children" :id="childKey" track-by="$index"></Item>
+    <circle cx="0" cy="0" :r="item.width" v-on:mousedown.self="startDrag" v-on:click="toggleSelection(id)"></circle>
+
+    <Item v-for="childKey in children" :id="childKey" track-by="$index"></Item>
   </g>
 
 </template>
@@ -16,7 +18,7 @@
 <script>
 import Api from '../api'
 import store from '../stores/store'
-import { dropItem, removeItem, itemUpdate, toggleSelection } from '../stores/actions'
+import { dropItem, removeItem, itemUpdate, toggleSelection, detachItem } from '../stores/actions'
 import { viewPort, selected } from '../stores/getters'
 
 export default {
@@ -34,6 +36,7 @@ export default {
       drop: dropItem,
       remove: removeItem,
       update: itemUpdate,
+      detach: detachItem,
       toggleSelection
     },
 
@@ -52,6 +55,17 @@ export default {
   },
 
   computed: {
+
+    middlePoint () {
+      return {
+        x: -this.item.x / 2,
+        y: -this.item.y / 2
+      }
+    },
+
+    children () {
+      return Object.keys(this.item.children || {})
+    },
 
     item () {
       return store.state.objects[this.id] || {x: 0, y: 0, width: 0, height: 0}
@@ -118,8 +132,7 @@ export default {
   },
 
   beforeDestroy () {
-    Api.remove('mouseup', this)
-    Api.remove('mousemove', this)
+    Api.removeAll(this)
   }
 }
 </script>
@@ -135,14 +148,20 @@ export default {
 circle{
   @include theme(fill, primary);
   position: relative;
-  transition: 0.3s;
-  transition-timing-function: cubic-bezier(0.110, 1.650, 0.345, 0.845);
   cursor: pointer;
 
   &.selection-indicator{
+    transition: 0.3s;
+    transition-timing-function: cubic-bezier(0.110, 1.650, 0.345, 0.845);
     fill: transparent;
     stroke-width: 4px;
     @include theme(stroke, primary);
+  }
+
+  &.detach {
+    fill: transparent;
+    stroke-width: 4px;
+    @include theme(stroke, secondary);
   }
 }
 

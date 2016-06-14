@@ -1,12 +1,12 @@
 <template>
 
     <view-canvas>
-      <Item v-for="childId in canvas.children" :id="childId" track-by="$index"></Item>
+      <Item v-for="childId in canvasObjects" :id="childId" track-by="$index"></Item>
     </view-canvas>
 
     <div class="toolbar">
       <button v-on:click="showItems()">+View</button>
-      <button v-on:click="createCanvas({name: Date.now()})">+Canvas</button>
+      <button v-on:click="createCanvas({name: Date.now(), type: 'canvas'})">+Canvas</button>
       <button v-on:click="addChild()">+Item</button>
     </div>
 
@@ -20,7 +20,7 @@ import ItemEditor from './components/item-editor'
 
 import { createCanvas, addChild, initializeCanvas } from './stores/actions'
 import { showItems } from './stores/view-actions'
-import { canvas } from './stores/getters'
+import { canvas, canvasObjects } from './stores/getters'
 
 export default {
   components: {
@@ -38,7 +38,8 @@ export default {
     },
 
     getters: {
-      canvas
+      canvas,
+      canvasObjects
     }
   },
 
@@ -57,6 +58,7 @@ export default {
 */
 @import './styles/reset';
 @import './styles/layout';
+@import './styles/theme';
 g{
   overflow: visible;
 }
@@ -66,7 +68,7 @@ g{
   top: 0;
   left: 0;
   bottom: 0;
-  background-color: rgb(232, 0, 139);
+  @include theme(background-color, primary);
   display: flex;
   flex-direction: column;
   overflow: hidden;

@@ -1,7 +1,8 @@
 export function getPointer (event) {
   return {
     x: event.pageX,
-    y: event.pageY
+    y: event.pageY,
+    timeStamp: event.timeStamp || Date.now()
   }
 }
 

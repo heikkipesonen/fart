@@ -11,17 +11,11 @@ class Api {
      */
     this._listeners = {}
 
-    document.body.addEventListener('mouseup', (event) => {
-      this._fire('mouseup', event)
-    })
-
-    document.body.addEventListener('mousemove', (event) => {
-      this._fire('mousemove', event)
-    })
-
-    document.body.addEventListener('mousedown', (event) => {
-      this._fire('mousedown', event)
-    })
+    document.body.addEventListener('mouseup', (event) => this._fire('mouseup', event))
+    document.body.addEventListener('mousemove', (event) => this._fire('mousemove', event))
+    document.body.addEventListener('mousedown', (event) => this._fire('mousedown', event))
+    document.addEventListener('mousewheel', (event) => this._fire('mousewheel', event))
+    window.addEventListener('resize', (event) => this._fire('resize', event))
   }
 
   /**
@@ -41,6 +35,20 @@ class Api {
     })
   }
 
+  /**
+   * remvoe all listeners
+   * @param  {[type]} context [description]
+   * @return {[type]}         [description]
+   */
+  removeAll (context) {
+    Object.keys(this._listeners).forEach((eventName) => {
+      this._listeners[eventName].forEach((event, index) => {
+        if (event.context === context) {
+          this._listeners[eventName].splice(index, 1)
+        }
+      })
+    })
+  }
   /**
    * remove registered callback object from event emitter
    * identifies callbacks by contexts

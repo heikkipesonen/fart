@@ -1,5 +1,7 @@
 export const canvas = (state) => state.canvas
 
+export const canvasObjects = (state) => Object.keys(state.canvas.children || {})
+
 export const viewPort = (state) => state.view
 
 export const selected = (state) => state.selectedItem

@@ -22,48 +22,47 @@ export const addChild = function ({dispatch, state}, child) {
   }
 
   let key = OBJECTS.push(child).key
-
-  CANVAS.transaction((canvas) => {
-    if (!canvas) canvas = {}
-    if (!canvas.children) canvas.children = []
-
-    canvas.children.push(key)
-
-    return canvas
-  })
+  CANVAS.child('children').child(key).set(true)
 }
 
 export const setToChild = function ({dispatch, state}, source, target) {
   let sourceObject = state.objects[source]
+  if (state.objects[source].children && state.objects[source].children[target]) return
+
   let sourcePosition = getObjectPosition(source, state.objects)
   let targetPosition = getObjectPosition(target, state.objects)
 
-  sourceObject.x = sourcePosition.x - targetPosition.x
-  sourceObject.y = sourcePosition.y - targetPosition.y
+  let dx = sourcePosition.x - targetPosition.x
+  let dy = sourcePosition.x - targetPosition.x
+
+  sourceObject.x = dx + sourceObject.width * 2
+  sourceObject.y = dy + sourceObject.height * 2
+
+  if (!sourceObject.parent) {
+    CANVAS.child('children').child(source).remove()
+  } else {
+    OBJECTS.child(sourceObject.parent).child('children').child(source).remove()
+  }
+  OBJECTS.child(target).child('children').child(source).set(true)
   sourceObject.parent = target
+  OBJECTS.child(source).set(sourceObject)
+}
 
-  dispatch('OBJECTUPDATE', source, sourceObject)
+export const detachItem = function ({dispatch, state}, id) {
+  console.log(id)
+  let sourceObject = state.objects[id]
 
-  CANVAS.transaction((canvas) => {
-    if (!canvas) canvas = {}
-    if (!canvas.children) canvas.children = []
-    if (canvas.children.indexOf(source) > -1) {
-      canvas.children.splice(canvas.children.indexOf(source), 1)
-    }
+  if (sourceObject.parent) {
+    let parentPosition = getObjectPosition(sourceObject.parent, state.objects)
+    OBJECTS.child(sourceObject.parent).child('children').child(id).remove()
 
-    return canvas
-  }).then(() => {
-    OBJECTS.child(target).transaction(function (target) {
-      if (!target.children) target.children = []
-      if (target.children.indexOf(source) === -1) {
-        target.children.push(source)
-      }
+    sourceObject.x += parentPosition.x
+    sourceObject.y += parentPosition.y
+    sourceObject.parent = null
 
-      return target
-    }).then(() => {
-      OBJECTS.child(source).set(sourceObject)
-    })
-  })
+    OBJECTS.child(id).set(sourceObject)
+    CANVAS.child('children').child(id).set(true)
+  }
 }
 
 /**
@@ -74,8 +73,6 @@ export const setToChild = function ({dispatch, state}, source, target) {
  * @return {[type]}           [description]
  */
 export const dropItem = function ({dispatch, state}, id) {
-  if (state.objects[id].parent) return
-
   let dropPosition = getObjectPosition(id, state.objects)
 
   let dropTarget = Object.keys(state.objects).find((key) => {
