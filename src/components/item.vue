@@ -3,8 +3,8 @@
 
     <path v-if="item.parent" :d="bezier"></path>
 
-    <text class="text" text-anchor="middle" x="0" :y="-radius * 1.5">{{ title }}</text>
-    <text class="text" text-anchor="middle" x="0" :y="radius">{{ Math.round(item.x) }}, {{ Math.round(item.y) }}</text>
+    <text class="text" text-anchor="middle" x="0" :y="topLabelPosition">{{ title }}</text>
+    <text class="text" text-anchor="middle" x="0" :y="bottomLabelPosition">{{ Math.round(item.x) }}, {{ Math.round(item.y) }}</text>
 
     <circle v-if="item.parent" class="detach" :cx="middlePoint.x" :cy="middlePoint.y" r="20" v-on:click.self="detach(id)"></circle>
 
@@ -64,20 +64,34 @@ export default {
   },
 
   computed: {
+    topLabelPosition () {
+      if (this.type === 'circle') {
+        return -this.radius - 10
+      }
+      return -this.height / 2 - 10
+    },
+
+    bottomLabelPosition () {
+      if (this.type === 'circle') {
+        return this.radius + 20
+      }
+      return this.height / 2 + 20
+    },
+
     title () {
       return this.item.title ? this.item.title : this.id
     },
 
     radius () {
-      return this.item.radius ? this.item.radius : this.item.height ? this.item.height : this.item.width ? this.item.width : 30
+      return parseInt(this.item.radius ? this.item.radius : this.item.height ? this.item.height : this.item.width ? this.item.width : 30)
     },
 
     width () {
-      return this.item.width ? this.item.width : this.item.height ? this.item.height : this.item.radius ? this.item.radius : 30
+      return parseInt(this.item.width ? this.item.width : this.item.height ? this.item.height : this.item.radius ? this.item.radius : 30)
     },
 
     height () {
-      return this.item.height ? this.item.height : this.item.width ? this.item.width : this.item.radius ? this.item.radius : 30
+      return parseInt(this.item.height ? this.item.height : this.item.width ? this.item.width : this.item.radius ? this.item.radius : 30)
     },
 
     type () {
@@ -212,6 +226,10 @@ circle:hover ~ g {
   }
 
   circle {
+    @include theme(fill, secondary);
+  }
+
+  text {
     @include theme(fill, secondary);
   }
 }
