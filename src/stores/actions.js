@@ -5,6 +5,10 @@ import { objectIntersects, getObjectPosition } from '../utils'
 let CANVAS = null
 let OBJECTS = null
 
+export const editItem = function ({dispatch, state}, id, child) {
+  dispatch('EDITITEM', id, child)
+}
+
 /**
  * [addChild description]
  * @param {[type]} {dispatch [description]

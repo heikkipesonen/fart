@@ -16,3 +16,8 @@ $theme : (
 @mixin theme($prop, $color) {
   #{$prop}: map-get($theme, $color);
 }
+
+h2 {
+  font-size: 2rem;
+  font-weight: 100;
+}

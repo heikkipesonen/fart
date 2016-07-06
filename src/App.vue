@@ -10,7 +10,7 @@
       <button v-on:click="addChild()">+Item</button>
     </div>
 
-    <item-editor v-if="editableItem" :item="editableItem"></item-editor>
+    <item-editor v-if="editorVisible" :item="editorItem"></item-editor>
 </template>
 
 <script>
@@ -20,7 +20,7 @@ import ItemEditor from './components/item-editor'
 
 import { createCanvas, addChild, initializeCanvas } from './stores/actions'
 import { showItems } from './stores/view-actions'
-import { canvas, canvasObjects } from './stores/getters'
+import { canvas, canvasObjects, editorVisible, editorItem } from './stores/getters'
 
 export default {
   components: {
@@ -39,7 +39,9 @@ export default {
 
     getters: {
       canvas,
-      canvasObjects
+      canvasObjects,
+      editorVisible,
+      editorItem
     }
   },
 

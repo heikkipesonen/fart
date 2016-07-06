@@ -1,5 +1,11 @@
 export const canvas = (state) => state.canvas
 
+export const editorVisible = (state) => state.editor.visible
+
+export const editorItem = (state) => { return { item: state.editor.item, id: state.editor.id } }
+
+export const types = (state) => state.types
+
 export const canvasObjects = (state) => Object.keys(state.canvas.children || {})
 
 export const viewPort = (state) => state.view

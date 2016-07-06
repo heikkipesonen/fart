@@ -26,14 +26,14 @@ export default {
 
   .input-label{
     position: absolute;
-    bottom: 8px;
+    top: 36px;
     left: 10px;
     transition: 0.2s;
     font-weight: 200;
     color: #aaa;
   }
 
-  input{
+  input, textarea{
     font-size: 10pt;
     min-width: 64px;
     flex: 1;
@@ -47,27 +47,32 @@ export default {
     font-weight: 200;
   }
 
+  textarea {
+    min-height: 128px;
+  }
 
-  input::placeholder{
+  input::placeholder, textarea::placeholder {
     opacity: 0;
   }
 
-  input:not(:placeholder-shown){
+  input:not(:placeholder-shown), textarea:not(:placeholder-shown){
     border-bottom: 2px solid #aaa;
     color: #222;
   }
 
+  textarea:not(:placeholder-shown) + .input-label,
+  textarea:focus + .input-label,
   input:not(:placeholder-shown) + .input-label,
-  input:focus + .input-label{
+  input:focus + .input-label {
     transform: translate3d(-2px,-23px,0) scale3d(0.9, 0.9, 1);
   }
 
-  input:focus, input:active {
+  input:focus, input:active, textarea:focus, textarea:active {
     border-bottom: 2px solid;
     @include theme(color, primary);
   }
 
-  input:focus + label, input:active + label{
+  input:focus + label, input:active + label, textarea:focus + label, textarea:active + label{
     color: inherit;
   }
 }

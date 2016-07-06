@@ -4,8 +4,18 @@ import Vue from 'vue'
 Vue.use(Vuex)
 
 const state = {
+  editor: {
+    visible: false,
+    id: false,
+    item: false
+  },
+
+  types: ['circle', 'square'],
+
   canvas: {},
+
   selectedItem: null,
+
   objects: {},
 
   view: {
@@ -20,6 +30,12 @@ const state = {
 }
 
 const mutations = {
+  EDITITEM (state, id, item) {
+    state.editor.visible = true
+    state.editor.id = id
+    state.editor.item = item
+  },
+
   SETVIEW (state, view) {
     state.view = view
   },

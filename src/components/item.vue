@@ -1,16 +1,18 @@
 <template>
   <g :transform="position" :class="classNames">
 
-    <line v-if="item.parent" x1="0" y1="0" :x2="-item.x" :y2="-item.y"></line>
+    <path v-if="item.parent" :d="bezier"></path>
 
-    <circle class="selection-indicator" cx="0" cy="0" :r="item.width + 5"></circle>
+    <text class="text" text-anchor="middle" x="0" :y="-radius * 1.5">{{ title }}</text>
+    <text class="text" text-anchor="middle" x="0" :y="radius">{{ Math.round(item.x) }}, {{ Math.round(item.y) }}</text>
 
-    <text class="text" text-anchor="middle" x="0" y="70">{{ Math.round(item.x) }}, {{ Math.round(item.y) }}</text>
     <circle v-if="item.parent" class="detach" :cx="middlePoint.x" :cy="middlePoint.y" r="20" v-on:click.self="detach(id)"></circle>
 
-    <circle cx="0" cy="0" :r="item.width" v-on:mousedown.self="startDrag" v-on:click="toggleSelection(id)"></circle>
-
-    <Item v-for="childKey in children" :id="childKey" track-by="$index"></Item>
+    <g>
+      <circle v-if="type === 'circle'" cx="0" cy="0" :r="radius" v-on:mousedown.self="startDrag"  v-on:click="_editItem()"></circle>
+      <rect v-if="type === 'square'" :width="width" :height="height" :x="-width / 2" :y="-height / 2" v-on:mousedown.self="startDrag"  v-on:click="_editItem()"></rect>
+      <Item v-for="childKey in children" :id="childKey" track-by="$index"></Item>
+    </g>
   </g>
 
 </template>
@@ -18,8 +20,8 @@
 <script>
 import Api from '../api'
 import store from '../stores/store'
-import { dropItem, removeItem, itemUpdate, toggleSelection, detachItem } from '../stores/actions'
-import { viewPort, selected } from '../stores/getters'
+import { dropItem, removeItem, itemUpdate, toggleSelection, detachItem, editItem } from '../stores/actions'
+import { viewPort, selected, types } from '../stores/getters'
 
 export default {
   name: 'Item',
@@ -37,30 +39,60 @@ export default {
       remove: removeItem,
       update: itemUpdate,
       detach: detachItem,
-      toggleSelection
+      toggleSelection,
+      editItem
     },
 
     getters: {
       viewPort,
-      selected
+      selected,
+      types
     }
   },
 
   data () {
     return {
+      smoothFactor: 3,
       deltaX: 0,
       deltaY: 0,
       lastEvent: null
     }
   },
 
+  default: {
+    type: 'circle'
+  },
+
   computed: {
+    title () {
+      return this.item.title ? this.item.title : this.id
+    },
+
+    radius () {
+      return this.item.radius ? this.item.radius : this.item.height ? this.item.height : this.item.width ? this.item.width : 30
+    },
+
+    width () {
+      return this.item.width ? this.item.width : this.item.height ? this.item.height : this.item.radius ? this.item.radius : 30
+    },
+
+    height () {
+      return this.item.height ? this.item.height : this.item.width ? this.item.width : this.item.radius ? this.item.radius : 30
+    },
+
+    type () {
+      return this.types.indexOf(this.item.type) > -1 ? this.item.type : 'circle'
+    },
 
     middlePoint () {
       return {
         x: -this.item.x / 2,
         y: -this.item.y / 2
       }
+    },
+
+    bezier () {
+      return `M0,0 C0,${-this.item.y / this.smoothFactor} ${-this.item.x / this.smoothFactor},0 ${-this.item.x},${-this.item.y}`
     },
 
     children () {
@@ -81,6 +113,9 @@ export default {
   },
 
   methods: {
+    _editItem () {
+      this.editItem(this.id, this.item)
+    },
 
     startDrag (evt) {
       this.deltaX = 0
@@ -139,16 +174,18 @@ export default {
 <style lang="scss" scoped>
 @import '../styles/theme';
 
-.text{
+.text {
   font-weight: 200;
   text-transform: uppercase;
   @include theme(fill, primary);
 }
 
-circle{
+circle, rect {
   @include theme(fill, primary);
   position: relative;
   cursor: pointer;
+  transition: 0.3s;
+  transition-property: fill;
 
   &.selection-indicator{
     transition: 0.3s;
@@ -163,19 +200,35 @@ circle{
     stroke-width: 4px;
     @include theme(stroke, secondary);
   }
+
+  &:hover {
+    @include theme(fill, secondary);
+  }
+}
+
+circle:hover ~ g {
+  path {
+    @include theme(stroke, secondary);
+  }
+
+  circle {
+    @include theme(fill, secondary);
+  }
 }
 
 g.unselected> circle.selection-indicator {
   r: 0 !important;
 }
 
-line{
+line, path {
    @include theme(stroke, primary);
+   fill: transparent;
+   pointer-events: none;
+   opacity: 0.3;
    stroke-width: 2;
-   transition: 0.3s;
 }
 
-.item{
+.item {
   position: absolute;
   padding: 16px;
   width: 200px;
@@ -183,7 +236,7 @@ line{
   color: white;
 }
 
-svg{
+svg {
   position: absolute;
   top: 100px;
   left: 100px;
