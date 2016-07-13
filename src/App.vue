@@ -3,7 +3,7 @@
       <div class="toolbar">
         <button v-on:click="showItems()">+View</button>
         <button v-on:click="createCanvas({name: Date.now(), type: 'canvas'})">+Canvas</button>
-        <button v-on:click="addChild()">+Item</button>
+        <button v-on:click="_addChild()">+Item</button>
       </div>
 
       <div flex class="relative">
@@ -21,7 +21,7 @@ import Item from './components/item'
 import ViewCanvas from './components/view-canvas'
 import ItemEditor from './components/item-editor'
 
-import { createCanvas, addChild, initializeCanvas } from './stores/actions'
+import { createCanvas, addChild, initializeCanvas, editItem } from './stores/actions'
 import { showItems } from './stores/view-actions'
 import { canvas, canvasObjects, editorVisible, editorItem } from './stores/getters'
 
@@ -37,7 +37,8 @@ export default {
       showItems,
       createCanvas,
       addChild,
-      initializeCanvas
+      initializeCanvas,
+      editItem
     },
 
     getters: {
@@ -45,6 +46,13 @@ export default {
       canvasObjects,
       editorVisible,
       editorItem
+    }
+  },
+
+  methods: {
+    _addChild () {
+      let key = this.addChild()
+      this.editItem(key)
     }
   },
 

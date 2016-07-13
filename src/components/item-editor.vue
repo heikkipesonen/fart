@@ -1,17 +1,12 @@
 <template>
 <div class="item-editor" layout-column>
   <div class="header toolbar horizontal">
-    <h2>{{item.title}}</h2>
+    <h2 flex>{{item.title}}</h2>
     <button v-on:click="close()">x</button>
   </div>
   <div class="editor-content">
     <div class="layout-row">
 
-    </div>
-    <div class="layout-row">
-      <input-container label="name" flex>
-        <input v-on:blur="_update()" type="text" v-model="item.name" placeholder=" ">
-      </input-container>
     </div>
 
     <div class="layout-row">

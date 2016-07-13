@@ -31,6 +31,8 @@ export const addChild = function ({dispatch, state}, child) {
 
   let key = OBJECTS.push(child).key
   CANVAS.child('children').child(key).set(true)
+
+  return key
 }
 
 export const setToChild = function ({dispatch, state}, source, target) {

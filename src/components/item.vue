@@ -9,8 +9,8 @@
     <circle v-if="item.parent" class="detach" :cx="middlePoint.x" :cy="middlePoint.y" r="20" v-on:click.self="detach(id)"></circle>
 
     <g>
-      <circle v-if="type === 'circle'" cx="0" cy="0" :r="radius" v-on:mousedown.self="startDrag"  v-on:click="editItem(id)"></circle>
-      <rect v-if="type === 'square'" :width="width" :height="height" :x="-width / 2" :y="-height / 2" v-on:mousedown.self="startDrag"   v-on:click="editItem(id)"></rect>
+      <circle v-if="type === 'circle'" cx="0" cy="0" :r="radius" v-on:mousedown.self="startDrag"  v-on:click="_editItem(id)"></circle>
+      <rect v-if="type === 'square'" :width="width" :height="height" :x="-width / 2" :y="-height / 2" v-on:mousedown.self="startDrag" v-on:click="_editItem(id)"></rect>
     </g>
 
     <Item v-for="childKey in children" :id="childKey" track-by="$index"></Item>
@@ -21,7 +21,7 @@
 <script>
 import Api from '../api'
 import store from '../stores/store'
-import { dropItem, removeItem, itemUpdate, toggleSelection, detachItem, editItem } from '../stores/actions'
+import { dropItem, removeItem, itemUpdate, toggleSelection, detachItem, editItem, closeEditor } from '../stores/actions'
 import { viewPort, selected, types } from '../stores/getters'
 
 export default {
@@ -41,7 +41,8 @@ export default {
       update: itemUpdate,
       detach: detachItem,
       toggleSelection,
-      editItem
+      editItem,
+      closeEditor
     },
 
     getters: {
@@ -132,6 +133,12 @@ export default {
       console.log('pyly')
     },
 
+    _editItem (id) {
+      if (Math.abs(this.deltaX) < 5 && Math.abs(this.deltaY) < 5) {
+        this.editItem(id)
+      }
+    },
+
     startDrag (evt) {
       this.deltaX = 0
       this.deltaY = 0
@@ -143,6 +150,8 @@ export default {
         x: evt.pageX,
         y: evt.pageY
       }
+
+      this.closeEditor()
     },
 
     onDrag (evt) {
