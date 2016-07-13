@@ -2,7 +2,11 @@ export const canvas = (state) => state.canvas
 
 export const editorVisible = (state) => state.editor.visible
 
-export const editorItem = (state) => { return { item: state.editor.item, id: state.editor.id } }
+export const editorItem = (state) => state.editor.item
+
+export const editorObject = (state) => state.objects[state.editor.item]
+
+export const objects = (state) => state.objects
 
 export const types = (state) => state.types
 

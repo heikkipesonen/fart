@@ -6,7 +6,6 @@ Vue.use(Vuex)
 const state = {
   editor: {
     visible: false,
-    id: false,
     item: false
   },
 
@@ -22,6 +21,7 @@ const state = {
     x: 0,
     y: 0,
     scale: 1,
+    blur: 0,
     size: {
       width: 0,
       height: 0
@@ -30,10 +30,16 @@ const state = {
 }
 
 const mutations = {
-  EDITITEM (state, id, item) {
+  EDITITEM (state, id) {
     state.editor.visible = true
-    state.editor.id = id
-    state.editor.item = item
+    state.editor.item = id
+    state.view.blur = 10
+  },
+
+  CLOSEEDITOR (state) {
+    state.editor.visible = false
+    state.editor.item = false
+    state.view.blur = 0
   },
 
   SETVIEW (state, view) {
@@ -50,6 +56,10 @@ const mutations = {
 
   OBJECTUPDATE (state, id, object) {
     state.objects[id] = object
+  },
+
+  SETOBJECT (state, id, object) {
+    state.objects[id].set(object)
   },
 
   SELECTITEM (state, id) {

@@ -1,15 +1,18 @@
 <template>
+    <div layout-row class="view">
+      <div class="toolbar">
+        <button v-on:click="showItems()">+View</button>
+        <button v-on:click="createCanvas({name: Date.now(), type: 'canvas'})">+Canvas</button>
+        <button v-on:click="addChild()">+Item</button>
+      </div>
 
-    <view-canvas>
-      <Item v-for="childId in canvasObjects" :id="childId" track-by="$index"></Item>
-    </view-canvas>
+      <div flex class="relative">
+        <view-canvas>
+          <Item v-for="childId in canvasObjects" :id="childId" track-by="$index"></Item>
+        </view-canvas>
+      </div>
 
-    <div class="toolbar">
-      <button v-on:click="showItems()">+View</button>
-      <button v-on:click="createCanvas({name: Date.now(), type: 'canvas'})">+Canvas</button>
-      <button v-on:click="addChild()">+Item</button>
     </div>
-
     <item-editor v-if="editorVisible" :item="editorItem"></item-editor>
 </template>
 
@@ -59,36 +62,8 @@ export default {
    License: none (public domain)
 */
 @import './styles/reset';
-@import './styles/layout';
 @import './styles/theme';
-g{
-  overflow: visible;
-}
-.toolbar{
-  position: absolute;
-  width: 64px;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  @include theme(background-color, primary);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  color: white;
+@import './styles/layout';
 
-  button{
-    width: 64px;
-    height: 64px;
-    transition: 0.2s;
-
-    &:hover{
-      background-color: rgba(255, 255, 255, 0.31);
-    }
-  }
-}
-
-body, html{
-  font-family: Helvetica neue;
-}
 
 </style>

@@ -5,8 +5,12 @@ import { objectIntersects, getObjectPosition } from '../utils'
 let CANVAS = null
 let OBJECTS = null
 
-export const editItem = function ({dispatch, state}, id, child) {
-  dispatch('EDITITEM', id, child)
+export const editItem = function ({dispatch, state}, id) {
+  dispatch('EDITITEM', id)
+}
+
+export const closeEditor = function ({dispatch, state}) {
+  dispatch('CLOSEEDITOR')
 }
 
 /**
@@ -132,7 +136,7 @@ export const removeItem = function ({dispatch, state}, id) {
  * @return {[type]}           [description]
  */
 export const updateItem = function ({dispatch, state}, id, child) {
-  OBJECTS.child(id).set(child)
+  dispatch('SETOBJECT', id, child)
 }
 
 /**

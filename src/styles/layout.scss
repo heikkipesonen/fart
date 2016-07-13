@@ -19,6 +19,19 @@ button:hover{
   opacity: 0.7;
 }
 
+g{
+  overflow: visible;
+}
+
+body, html{
+  font-family: Helvetica neue;
+}
+
+
+&.relative {
+  position: relative;
+}
+
 .column{
   padding-left: 8px;
   padding-right: 8px;
@@ -34,13 +47,19 @@ button:hover{
 }
 
 .layout-column, [layout-column]{
+  position: relative;
   display: flex;
   flex-direction: column;
 }
 
 .layout-row, [layout-row]{
+  position: relative;
   display: flex;
   flex-direction: row;
+}
+
+[layout-fill] {
+  min-height: 100%;
 }
 
 .padding{
@@ -50,4 +69,41 @@ button:hover{
 .toolbar{
   position: relative;
   z-index: 100;
+}
+
+.toolbar{
+  width: 64px;
+  @include theme(background-color, primary);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: white;
+
+  &.horizontal {
+    width: 100%;
+    height: 64px;
+
+    padding: 0 16px;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  button{
+    width: 64px;
+    height: 64px;
+    transition: 0.2s;
+
+    &:hover{
+      background-color: rgba(255, 255, 255, 0.31);
+    }
+  }
+}
+
+
+.view {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }

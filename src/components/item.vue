@@ -9,10 +9,11 @@
     <circle v-if="item.parent" class="detach" :cx="middlePoint.x" :cy="middlePoint.y" r="20" v-on:click.self="detach(id)"></circle>
 
     <g>
-      <circle v-if="type === 'circle'" cx="0" cy="0" :r="radius" v-on:mousedown.self="startDrag"  v-on:click="_editItem()"></circle>
-      <rect v-if="type === 'square'" :width="width" :height="height" :x="-width / 2" :y="-height / 2" v-on:mousedown.self="startDrag"  v-on:click="_editItem()"></rect>
-      <Item v-for="childKey in children" :id="childKey" track-by="$index"></Item>
+      <circle v-if="type === 'circle'" cx="0" cy="0" :r="radius" v-on:mousedown.self="startDrag"  v-on:click="editItem(id)"></circle>
+      <rect v-if="type === 'square'" :width="width" :height="height" :x="-width / 2" :y="-height / 2" v-on:mousedown.self="startDrag"   v-on:click="editItem(id)"></rect>
     </g>
+
+    <Item v-for="childKey in children" :id="childKey" track-by="$index"></Item>
   </g>
 
 </template>
@@ -52,7 +53,7 @@ export default {
 
   data () {
     return {
-      smoothFactor: 3,
+      smoothFactor: 1000,
       deltaX: 0,
       deltaY: 0,
       lastEvent: null
@@ -127,8 +128,8 @@ export default {
   },
 
   methods: {
-    _editItem () {
-      this.editItem(this.id, this.item)
+    toggle () {
+      console.log('pyly')
     },
 
     startDrag (evt) {
@@ -216,6 +217,12 @@ circle, rect {
   }
 
   &:hover {
+    @include theme(fill, secondary);
+  }
+}
+
+.selected>g{
+  >circle, >rect {
     @include theme(fill, secondary);
   }
 }

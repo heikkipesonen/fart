@@ -1,8 +1,8 @@
 <template>
-  <svg class="view-canvas" :width="position.size.width" :height="position.size.height" v-on:mousedown.self="startDrag" v-on:click.self="_onClick">
+  <svg class="view-canvas" width="100%" height="100%" v-on:mousedown.self="startDrag" v-on:click.self="_onClick">
     <defs>
       <filter id="f1" x="0" y="0">
-        <feGaussianBlur in="SourceGraphic" stdDeviation="0" />
+        <feGaussianBlur in="SourceGraphic" :stdDeviation="view.blur" />
       </filter>
     </defs>
     <g :transform="style" filter="url(#f1)">
@@ -31,7 +31,7 @@ export default {
     },
 
     getters: {
-      position: viewPort
+      view: viewPort
     }
   },
 
@@ -45,11 +45,11 @@ export default {
 
   computed: {
     center () {
-      return this.toCanvas(this.position.size.width / 2, this.position.size.height / 2)
+      return this.toCanvas(this.view.size.width / 2, this.view.size.height / 2)
     },
 
     style () {
-      return `translate(${this.position.x}, ${this.position.y}) scale(${this.position.scale}, ${this.position.scale})`
+      return `translate(${this.view.x}, ${this.view.y}) scale(${this.view.scale}, ${this.view.scale})`
     }
   },
 
@@ -68,8 +68,8 @@ export default {
      */
     toScreen (x, y) {
       return {
-        x: x + this.position.x * this.position.scale,
-        y: y + this.position.y + this.position.scale
+        x: x + this.view.x * this.view.scale,
+        y: y + this.view.y + this.view.scale
       }
     },
 
@@ -81,8 +81,8 @@ export default {
      */
     toCanvas (x, y) {
       return {
-        x: (x - this.position.x) / this.position.scale,
-        y: (y - this.position.y) / this.position.scale
+        x: (x - this.view.x) / this.view.scale,
+        y: (y - this.view.y) / this.view.scale
       }
     },
 
@@ -108,6 +108,8 @@ export default {
       this.deltaX = 0
       this.deltaY = 0
       this.lastEvent = getPointer(event)
+
+      console.log(this.view)
     },
 
     /**
@@ -126,11 +128,11 @@ export default {
         this.deltaY += sy
 
         let position = {
-          x: this.position.x + sx,
-          y: this.position.y + sy,
-          scale: this.position.scale,
-          size: this.position.size,
-          center: this.toCanvas(this.position.size.width / 2, this.position.size.height / 2)
+          x: this.view.x + sx,
+          y: this.view.y + sy,
+          scale: this.view.scale,
+          size: this.view.size,
+          center: this.toCanvas(this.view.size.width / 2, this.view.size.height / 2)
         }
 
         this.lastEvent = pointer
@@ -152,14 +154,14 @@ export default {
      * @return {[type]}       [description]
      */
     viewZoom (event) {
-      let scale = this.position.scale + (this.position.scale * event.wheelDeltaY / 4800)
+      let scale = this.view.scale + (this.view.scale * event.wheelDeltaY / 4800)
 
       let pointer = getPointer(event)
-      let currentScale = this.position.scale
+      let currentScale = this.view.scale
       let newScale = scale
 
-      let ix = (pointer.x - this.position.x) / currentScale
-      let iy = (pointer.y - this.position.y) / currentScale
+      let ix = (pointer.x - this.view.x) / currentScale
+      let iy = (pointer.y - this.view.y) / currentScale
 
       let nx = ix * newScale
       let ny = iy * newScale
@@ -167,9 +169,9 @@ export default {
       let position = {
         x: (ix + (pointer.x - ix) - nx),
         y: (iy + (pointer.y - iy) - ny),
-        size: this.position.size,
+        size: this.view.size,
         scale: newScale,
-        center: this.toCanvas(this.position.size.width / 2, this.position.size.height / 2)
+        center: this.toCanvas(this.view.size.width / 2, this.view.size.height / 2)
       }
 
       this.setView(position)
@@ -181,14 +183,14 @@ export default {
      */
     fitViewport () {
       let position = {
-        x: this.position.x,
-        y: this.position.y,
-        scale: this.position.scale,
+        x: this.view.x,
+        y: this.view.y,
+        scale: this.view.scale,
         size: {
           width: window.innerWidth,
           height: window.innerHeight
         },
-        center: this.toCanvas(this.position.size.width / 2, this.position.size.height / 2)
+        center: this.toCanvas(this.view.size.width / 2, this.view.size.height / 2)
       }
 
       this.setView(position)
